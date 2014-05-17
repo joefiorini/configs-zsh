@@ -1,0 +1,22 @@
+go() {
+  requested=$1
+  for project in $(go_projects_list)
+  do
+    if [[ $requested = $(basename $project) ]]
+    then
+      goto_project "$project"
+      return
+    fi
+  done
+}
+
+go_projects_list() {
+  ls -1d ~/Projects/*/*
+}
+
+goto_project() {
+  local godir
+  godir=$1
+  echo "cd $godir"
+  builtin cd $godir
+}
