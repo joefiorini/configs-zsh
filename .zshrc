@@ -193,7 +193,8 @@ zstyle ':vcs_info:*' actionformats \
 
 local jobs="%(1j, %{$FG[160]%}%j%{$reset_color%},)"
 PROMPT='${smiley}${jobs} '
-RPROMPT='%{$FG[136]%}$(rbenv prompt)%{$reset_color%} ${vcs_info_msg_0_}'
+command_exists rbenv && source $HOME/.zsh/rbenv_prompt.zsh
+RPROMPT="$RPROMPT ${vcs_info_msg_0_}"
 
 precmd_functions=($precmd_functions vcs_info update_tmux_title)
 
