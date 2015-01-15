@@ -23,7 +23,7 @@ set -o emacs
 
 ###### Aliases
 
-alias ll='/bin/ls -Gla'
+alias ll='/bin/ls -Glah'
 alias gf='git fetch'
 alias cwip='time cucumber -p wip'
 alias cuke='time cucumber -p default'
@@ -41,6 +41,8 @@ alias ql='qlmanage -p 2>/dev/null'
 alias git-brlog='for k in $(git branch -r | perl -pe '\''s/^..(.*?)( ->.*)?$/\1/'\''); do echo -e $(git show --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k -- | head -n 1)\\t$k; done | sort -r'
 
 alias tt='open -a Textastic "$@"'
+
+alias gi="cat << EOF >> .gitignore"
 
 ###### Speed up tab completion
 zstyle ':completion:*' accept-exact '*(N)'
@@ -175,6 +177,46 @@ update_tmux_title() {
   [[ $? -eq 0 ]] && tmux rename-window -t $window_index $(pretty_path $(pwd))
 }
 
+# mkwrap aws - creates ~/bin/aws that sources ~/.env/aws & opens ~/.env/aws in editor
+mkwrap() {
+  wrapper_name=$1
+  opens_editor=false
+
+  if [ -z "$wrapper_name" ]; then
+    echo "Must provide the name of the wrapper"
+    return
+  fi
+
+  if [ ! -z "$2" ]; then
+    env_script=$2
+  else
+    env_script=$wrapper_name
+  fi
+
+  if [ ! -f "$env_script" ]; then
+    opens_editor=true
+  fi
+
+  cat <<-EOF > ~/bin/$wrapper_name
+source ~/.env/$wrapper_name
+$wrapper_name $*
+EOF
+
+  chmod +x ~/bin/$wrapper_name
+
+  $opens_editor &&  $EDITOR ~/.env/$env_script
+}
+
+elm-init-post() {
+  chmod +x run
+  chmod +x test/run
+  bower install
+}
+
+elm-init() {
+  hi -a "Joe Fiorini" -e joe@joefiorini.com -p $1 -m $2 -r https://github.com/joefiorini/hi-elm.git --after-command elm-init-post
+}
+
 ###### Prompt
 
 autoload -U spectrum
@@ -193,8 +235,8 @@ zstyle ':vcs_info:*' actionformats \
 
 local jobs="%(1j, %{$FG[160]%}%j%{$reset_color%},)"
 PROMPT='${smiley}${jobs} '
-command_exists rbenv && source $HOME/.zsh/rbenv_prompt.zsh
-RPROMPT="$RPROMPT ${vcs_info_msg_0_}"
+RPROMPT='%{$FG[136]%}%{$reset_color%} ${vcs_info_msg_0_}'
+# RPROMPT='%{$FG[136]%}$(rbenv prompt)%{$reset_color%} ${vcs_info_msg_0_}'
 
 precmd_functions=($precmd_functions vcs_info update_tmux_title)
 
